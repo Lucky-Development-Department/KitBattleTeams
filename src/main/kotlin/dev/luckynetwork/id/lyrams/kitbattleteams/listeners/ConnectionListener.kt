@@ -30,7 +30,8 @@ class ConnectionListener(private val plugin: KitBattleTeams) : Listener {
         Bukkit.getScheduler().runTaskLater(plugin, { Database.unloadFromCache(player) }, 20L)
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, {
 
-            if (Bukkit.getPlayer(player.name) == null)
+            // if player decided to rejoin... aka player is now online again
+            if (Bukkit.getPlayer(player.name) != null)
                 return@runTaskLaterAsynchronously
 
             AntiSpamManager.antiSpamMap.values.forEach {

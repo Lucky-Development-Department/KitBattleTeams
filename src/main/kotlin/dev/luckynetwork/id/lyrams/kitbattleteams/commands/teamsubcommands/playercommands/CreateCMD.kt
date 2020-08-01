@@ -36,17 +36,17 @@ class CreateCMD(name: String) : SubCommand(name) {
 
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
-            if (currentTime - antiSpamMap!![sender]!! < 60000) {
-                val seconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
-                val milliSeconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
-                sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
-                return
-            } else {
+                if (currentTime - antiSpamMap!![sender]!! < 60000) {
+                    val seconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
+                    val milliSeconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
+                    sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
+                    return
+                } else {
+                    antiSpamMap!![sender] = currentTime
+                }
+            } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 60000) {
                 antiSpamMap!![sender] = currentTime
             }
-        } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 60000) {
-            antiSpamMap!![sender] = currentTime
-        }
 
         val members = ConcurrentHashMap.newKeySet<UUID>()
         members.add(sender.uniqueId)

@@ -61,8 +61,10 @@ class InviteCMD(name: String, vararg aliases: String) : SubCommand(name, *aliase
         notifyInvitationToTeam(sender, target)
         sender.sendMessage("§aInvited §l${target.name} §ato your team!")
         target.sendMessage("§a§l${sender.name} §ainvited you to join their team!")
-        target.sendMessage("§7This invitation will expire in 1 minute! To accept, please do " +
-                "/team join ${sender.name}")
+        target.sendMessage(
+            "§7This invitation will expire in 1 minute! To accept, please do " +
+                    "/team join ${sender.name}"
+        )
 
         Bukkit.getScheduler().runTaskLater(KitBattleTeams.instance, {
 

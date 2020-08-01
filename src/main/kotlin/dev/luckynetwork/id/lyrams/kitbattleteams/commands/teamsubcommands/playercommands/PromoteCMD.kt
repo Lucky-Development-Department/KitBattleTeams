@@ -6,7 +6,7 @@ import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.HashMap
+import java.util.*
 
 @Suppress("DEPRECATION")
 class PromoteCMD(name: String) : SubCommand(name) {
@@ -38,17 +38,17 @@ class PromoteCMD(name: String) : SubCommand(name) {
 
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
-            if (currentTime - antiSpamMap!![sender]!! < 60000) {
-                val seconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
-                val milliSeconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
-                sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
-                return
-            } else {
+                if (currentTime - antiSpamMap!![sender]!! < 60000) {
+                    val seconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
+                    val milliSeconds = (60000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
+                    sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
+                    return
+                } else {
+                    antiSpamMap!![sender] = currentTime
+                }
+            } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 60000) {
                 antiSpamMap!![sender] = currentTime
             }
-        } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 60000) {
-            antiSpamMap!![sender] = currentTime
-        }
 
         val target =
             when {
@@ -80,8 +80,10 @@ class PromoteCMD(name: String) : SubCommand(name) {
             val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
 
             targetTeamMemberTeamData.leader = target.uniqueId
-            targetTeamMembers.sendMessage("§e§l${sender.name} §6transferred the leadership of this team to " +
-                    "§e${target.name}§6!")
+            targetTeamMembers.sendMessage(
+                "§e§l${sender.name} §6transferred the leadership of this team to " +
+                        "§e${target.name}§6!"
+            )
         }
 
         if (Bukkit.getPlayer(target.name) != null) {

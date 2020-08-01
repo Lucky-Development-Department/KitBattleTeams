@@ -7,7 +7,7 @@ import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.HashMap
+import java.util.*
 
 class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
@@ -38,17 +38,17 @@ class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
 
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
-            if (currentTime - antiSpamMap!![sender]!! < 2000) {
-                val seconds = (2000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
-                val milliSeconds = (20000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
-                sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
-                return
-            } else {
+                if (currentTime - antiSpamMap!![sender]!! < 2000) {
+                    val seconds = (2000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
+                    val milliSeconds = (20000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
+                    sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
+                    return
+                } else {
+                    antiSpamMap!![sender] = currentTime
+                }
+            } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 2000) {
                 antiSpamMap!![sender] = currentTime
             }
-        } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 2000) {
-            antiSpamMap!![sender] = currentTime
-        }
 
         val toggle: Boolean? =
             if (args.isNotEmpty())
@@ -65,13 +65,10 @@ class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
         if (toggle == null)
             if (state == TeamPrivacy.PRIVATE)
                 team.privacy = TeamPrivacy.PUBLIC
-
             else
                 team.privacy = TeamPrivacy.PRIVATE
-
         else if (toggle)
             team.privacy = TeamPrivacy.PUBLIC
-
         else
             team.privacy = TeamPrivacy.PRIVATE
 

@@ -9,7 +9,7 @@ import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.HashMap
+import java.util.*
 
 class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
@@ -46,7 +46,8 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
         val inviteManager = InviteManager.INVITE_MAP
 
         if (targetTeam.privacy == TeamPrivacy.PRIVATE &&
-            (inviteManager[target] == null || !inviteManager[target]!!.contains(sender))) {
+            (inviteManager[target] == null || !inviteManager[target]!!.contains(sender))
+        ) {
             sender.sendMessage("§c§l${target.name} §cneeds to invite you before you can join their team!")
             return
         }
@@ -60,17 +61,17 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
 
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
-            if (currentTime - antiSpamMap!![sender]!! < 10000) {
-                val seconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
-                val milliSeconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
-                sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
-                return
-            } else {
+                if (currentTime - antiSpamMap!![sender]!! < 10000) {
+                    val seconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
+                    val milliSeconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
+                    sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
+                    return
+                } else {
+                    antiSpamMap!![sender] = currentTime
+                }
+            } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 10000) {
                 antiSpamMap!![sender] = currentTime
             }
-        } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 10000) {
-            antiSpamMap!![sender] = currentTime
-        }
 
         if (targetTeam.privacy == TeamPrivacy.PRIVATE)
             inviteManager[target]!!.remove(sender)
