@@ -1,8 +1,9 @@
 name: KitBattleTeams
-version: 0.1
+version: 1.0
 main: dev.luckynetwork.id.lyrams.kitbattleteams.KitBattleTeams
 depend: [LuckyInjector]
 authors: [LyraMS]
 
 commands:
   team:
+    aliases: [teams, t]
