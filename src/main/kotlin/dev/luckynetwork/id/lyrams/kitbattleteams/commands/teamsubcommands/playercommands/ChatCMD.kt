@@ -22,17 +22,13 @@ class ChatCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
         }
 
         if (args.isNotEmpty())
-            sendTeamMessage(
-                sender,
-                args.joinToString(" ")
-            )
+            sendTeamMessage(sender, args.joinToString(" "))
         else {
 
             val state = team.toggleTeamChatting()
             sender.sendMessage("§aTeam chat: ${state}!")
 
         }
-
 
     }
 

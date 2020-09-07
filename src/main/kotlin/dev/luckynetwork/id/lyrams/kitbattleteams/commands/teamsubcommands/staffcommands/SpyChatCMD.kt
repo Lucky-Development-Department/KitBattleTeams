@@ -16,7 +16,6 @@ class SpyChatCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
         }
 
         val state = sender.toggleTeamChatting()
-
         sender.sendMessage("§aChat Spy: $state")
 
     }

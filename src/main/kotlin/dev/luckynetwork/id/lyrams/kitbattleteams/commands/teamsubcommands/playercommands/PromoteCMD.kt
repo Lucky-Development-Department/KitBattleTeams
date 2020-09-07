@@ -77,9 +77,16 @@ class PromoteCMD(name: String) : SubCommand(name) {
                 continue
 
             val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
-            val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
+            Database.getTeamData(targetTeamMemberUUIDs).whenComplete { targetTeamMemberTeamData, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@whenComplete
+                }
 
-            targetTeamMemberTeamData.leader = target.uniqueId
+                if (targetTeamMemberTeamData != null)
+                    targetTeamMemberTeamData.leader = target.uniqueId
+            }
+
             targetTeamMembers.sendMessage(
                 "§e§l${sender.name} §6transferred the leadership of this team to " +
                         "§e${target.name}§6!"

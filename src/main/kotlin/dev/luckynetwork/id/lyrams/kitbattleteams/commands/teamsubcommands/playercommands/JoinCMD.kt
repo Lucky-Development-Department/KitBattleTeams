@@ -37,67 +37,81 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
             return
         }
 
-        val targetTeam = Database.getTeamData(target.uniqueId) ?: return
-        if (targetTeam.teamID == 0) {
-            sender.sendMessage("§c§l${target.name} §cis not in a team!")
-            return
-        }
-
-        val inviteManager = InviteManager.INVITE_MAP
-
-        if (targetTeam.privacy == TeamPrivacy.PRIVATE &&
-            (inviteManager[target] == null || !inviteManager[target]!!.contains(sender))
-        ) {
-            sender.sendMessage("§c§l${target.name} §cneeds to invite you before you can join their team!")
-            return
-        }
-
-        if (targetTeam.members!!.size >= KitBattleTeams.max_team_size) {
-            sender.sendMessage("§cSorry! But that team is full!")
-            return
-        }
-
-        val currentTime = System.currentTimeMillis()
-
-        if (!sender.hasPermission("kbteams.bypassantispam"))
-            if (antiSpamMap!!.containsKey(sender)) {
-                if (currentTime - antiSpamMap!![sender]!! < 10000) {
-                    val seconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
-                    val milliSeconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
-                    sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
-                    return
-                } else {
-                    antiSpamMap!![sender] = currentTime
-                }
-            } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 10000) {
-                antiSpamMap!![sender] = currentTime
+        Database.getTeamData(target.uniqueId).whenComplete { targetTeam, error ->
+            if (error != null) {
+                error.printStackTrace()
+                return@whenComplete
             }
 
-        if (targetTeam.privacy == TeamPrivacy.PRIVATE)
-            inviteManager[target]!!.remove(sender)
+            if (targetTeam != null) {
+                if (targetTeam.teamID == 0) {
+                    sender.sendMessage("§c§l${target.name} §cis not in a team!")
+                    return@whenComplete
+                }
 
-        for (targetTeamMemberUUIDs in targetTeam.members!!) {
-            if (Bukkit.getPlayer(targetTeamMemberUUIDs) == null)
-                continue
+                val inviteManager = InviteManager.INVITE_MAP
 
-            val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
-            val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
+                if (targetTeam.privacy == TeamPrivacy.PRIVATE &&
+                    (inviteManager[target] == null || !inviteManager[target]!!.contains(sender))
+                ) {
+                    sender.sendMessage("§c§l${target.name} §cneeds to invite you before you can join their team!")
+                    return@whenComplete
+                }
 
-            targetTeamMemberTeamData.members!!.add(sender.uniqueId)
-            targetTeamMembers.sendMessage("§a§l+ §e${sender.name} §6joined the team!")
+                if (targetTeam.members!!.size >= KitBattleTeams.max_team_size) {
+                    sender.sendMessage("§cSorry! But that team is full!")
+                    return@whenComplete
+                }
+
+                val currentTime = System.currentTimeMillis()
+
+                if (!sender.hasPermission("kbteams.bypassantispam"))
+                    if (antiSpamMap!!.containsKey(sender)) {
+                        if (currentTime - antiSpamMap!![sender]!! < 10000) {
+                            val seconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) / 1000 % 60
+                            val milliSeconds = (10000 - (currentTime - antiSpamMap!![sender]!!)) % 1000 / 100
+                            sender.sendMessage("§cPlease wait ${seconds}.${milliSeconds}s before doing that!")
+                            return@whenComplete
+                        } else {
+                            antiSpamMap!![sender] = currentTime
+                        }
+                    } else if (!antiSpamMap!!.containsKey(sender) || currentTime - antiSpamMap!![sender]!! < 10000) {
+                        antiSpamMap!![sender] = currentTime
+                    }
+
+                if (targetTeam.privacy == TeamPrivacy.PRIVATE)
+                    inviteManager[target]!!.remove(sender)
+
+                for (targetTeamMemberUUIDs in targetTeam.members!!) {
+                    if (Bukkit.getPlayer(targetTeamMemberUUIDs) == null)
+                        continue
+
+                    val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
+                    Database.getTeamData(targetTeamMemberUUIDs).whenComplete { targetTeamMemberTeamData, error1 ->
+                        if (error1 != null) {
+                            error1.printStackTrace()
+                            return@whenComplete
+                        }
+
+                        if (targetTeamMemberTeamData != null)
+                            targetTeamMemberTeamData.members!!.add(sender.uniqueId)
+
+                    }
+
+                    targetTeamMembers.sendMessage("§a§l+ §e${sender.name} §6joined the team!")
+                }
+
+                targetTeam.members!!.add(sender.uniqueId)
+
+                team.teamID = targetTeam.teamID
+                team.members = targetTeam.members
+                team.leader = targetTeam.leader
+                team.friendlyFire = targetTeam.friendlyFire
+
+                Database.saveTeamData(team)
+
+                sender.sendMessage("§6You joined §e${Bukkit.getOfflinePlayer(team.leader).name}'s §6team!")
+            }
         }
-
-        targetTeam.members!!.add(sender.uniqueId)
-
-        team.teamID = targetTeam.teamID
-        team.members = targetTeam.members
-        team.leader = targetTeam.leader
-        team.friendlyFire = targetTeam.friendlyFire
-
-        Database.saveTeamData(team)
-
-        sender.sendMessage("§6You joined §e${Bukkit.getOfflinePlayer(team.leader).name}'s §6team!")
-
     }
-
 }

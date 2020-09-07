@@ -52,26 +52,39 @@ class KickCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
                 continue
 
             val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
-            val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
+            Database.getTeamData(targetTeamMemberUUIDs).whenComplete { targetTeamMemberTeamData, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@whenComplete
+                }
 
-            targetTeamMemberTeamData.members!!.remove(sender.uniqueId)
-            targetTeamMembers.sendMessage("§c§l- §e§l${sender.name} §6kicked §e${target.name} §6from your team!")
+                if (targetTeamMemberTeamData != null) {
+                    targetTeamMemberTeamData.members!!.remove(sender.uniqueId)
+                    targetTeamMembers.sendMessage("§c§l- §e§l${sender.name} §6kicked §e${target.name} §6from your team!")
+                }
+            }
+
         }
 
         if (Bukkit.getPlayer(target.name) != null) {
             target as Player
-            val targetTeamData = Database.getTeamData(target.uniqueId) ?: return
+            Database.getTeamData(target.uniqueId).whenComplete { targetTeamData, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@whenComplete
+                }
 
-            targetTeamData.teamID = 0
-            targetTeamData.leader = null
-            targetTeamData.members = null
-            targetTeamData.friendlyFire = false
-
+                if (targetTeamData != null) {
+                    targetTeamData.teamID = 0
+                    targetTeamData.leader = null
+                    targetTeamData.members = null
+                    targetTeamData.friendlyFire = false
+                }
+            }
             target.sendMessage("§6§l${sender.name} §ekicked you from their team!")
         }
 
         Database.saveTeamData(team)
-
         sender.sendMessage("§aYou kicked §l${target.name} §afrom your team!")
 
     }

@@ -40,7 +40,6 @@ class TeamCMD : CommandExecutor {
         val newArgs = args.copyOfRange(1, args.size)
 
         CompletableFuture.runAsync {
-
             try {
                 for (subCommand in subCommands) {
                     if (subCommand.name == subCmd || subCommand.aliases.contains(subCmd)) {

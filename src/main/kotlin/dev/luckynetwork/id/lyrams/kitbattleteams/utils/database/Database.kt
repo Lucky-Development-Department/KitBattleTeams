@@ -17,12 +17,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.function.Supplier
 
-
 object Database {
 
     private lateinit var plugin: KitBattleTeams
-    lateinit var helper: SQLHelper
     private lateinit var playerCache: Cache<UUID, TeamData>
+    lateinit var helper: SQLHelper
     val threadPool: ExecutorService = Executors.newCachedThreadPool()
 
     fun init(plugin: KitBattleTeams) {
@@ -142,7 +141,6 @@ object Database {
                     val set = results.resultSet
 
                     if (set.next()) {
-
                         val members = set.getString("members")
                             .replace("[", "")
                             .replace("]", "")
@@ -155,10 +153,7 @@ object Database {
 
                         teamData =
                             TeamData(
-                                if (Bukkit.getPlayer(uuid) != null)
-                                    Bukkit.getPlayer(uuid)
-                                else
-                                    null,
+                                Bukkit.getPlayer(uuid),
                                 set.getInt("team_id"),
                                 UUID.fromString(set.getString("leader")),
                                 membersArray,
@@ -190,7 +185,6 @@ object Database {
                     val set = results.resultSet
 
                     if (set.next()) {
-
                         playerCache.put(
                             player.uniqueId,
                             TeamData(player, set.getInt("team_id"))
@@ -216,9 +210,7 @@ object Database {
 
     fun savePlayerData(player: Player): CompletableFuture<Void> {
         return CompletableFuture.runAsync(Runnable {
-
             try {
-
                 val teamData = getTeamData(player)
 
                 helper.query("UPDATE playerdata SET team_id = ? WHERE uuid = ?")
@@ -234,12 +226,10 @@ object Database {
 
     fun saveTeamData(teamData: TeamData): CompletableFuture<Void> {
         return CompletableFuture.runAsync(Runnable {
-
             if (teamData.teamID == 0)
                 return@Runnable
 
             try {
-
                 helper.query("UPDATE teamdata SET leader = ?, members = ?, friendly_fire = ?, privacy = ? WHERE team_id = ?;")
                     .execute(
                         teamData.leader,
@@ -259,10 +249,8 @@ object Database {
 
     private fun createEmptyPlayerData(player: Player): CompletableFuture<Void> {
         return CompletableFuture.runAsync(Runnable {
-
             try {
                 Closer().use {
-
                     helper.query("INSERT INTO playerdata (uuid, team_id) VALUES (?, ?);")
                         .execute(player.uniqueId, 0)
 
@@ -280,21 +268,18 @@ object Database {
 
     }
 
+    fun getTeamData(uuid: UUID): CompletableFuture<TeamData?> {
+        if (playerCache.containsKey(uuid))
+            return CompletableFuture.completedFuture(playerCache.get(uuid))
+
+        return loadTeamData(uuid)
+    }
+
     fun unloadFromCache(player: Player) =
         playerCache.containsAndRemove(player.uniqueId)
 
-    fun getTeamData(uuid: UUID): TeamData? {
-        var teamData: TeamData? = playerCache.get(uuid)
-
-        if (teamData == null)
-            teamData = loadTeamData(uuid).join()
-
-        return teamData
-    }
-
     fun getTeamData(player: Player): TeamData =
         playerCache.get(player.uniqueId)
-
 
     fun shutdown() {
         playerCache.clearAndClose()

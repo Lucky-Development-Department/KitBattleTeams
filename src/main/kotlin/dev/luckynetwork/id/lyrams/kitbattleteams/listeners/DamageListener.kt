@@ -21,13 +21,10 @@ class DamageListener : Listener {
         if (teamData.friendlyFire || teamData.members == null)
             return
 
-
         if (damager is Player && teamData.members!!.contains(damager.uniqueId) && damager != victim) {
-
             event.isCancelled = true
 
         } else if (damager is Arrow) {
-
             val shooter = damager.shooter
             if (shooter is Player && teamData.members!!.contains(shooter.uniqueId))
                 event.isCancelled = true

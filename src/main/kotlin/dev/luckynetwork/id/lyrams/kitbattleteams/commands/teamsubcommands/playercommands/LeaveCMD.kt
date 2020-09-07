@@ -64,9 +64,15 @@ class LeaveCMD(name: String) : SubCommand(name) {
                 continue
 
             val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
-            val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
+            Database.getTeamData(targetTeamMemberUUIDs).whenComplete { targetTeamMemberTeamData, error ->
+                if (error != null) {
+                    error.printStackTrace()
+                    return@whenComplete
+                }
 
-            targetTeamMemberTeamData.members!!.remove(sender.uniqueId)
+                if (targetTeamMemberTeamData != null)
+                    targetTeamMemberTeamData.members!!.remove(sender.uniqueId)
+            }
             targetTeamMembers.sendMessage("§c§l- §e${sender.name} §6left the team!")
         }
 

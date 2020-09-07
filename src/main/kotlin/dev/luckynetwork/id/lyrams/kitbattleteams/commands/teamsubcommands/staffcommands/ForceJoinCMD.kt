@@ -36,37 +36,48 @@ class ForceJoinCMD(name: String, vararg aliases: String) : SubCommand(name, *ali
             }
 
 
-        val targetTeam = Database.getTeamData(target.uniqueId)
-        if (targetTeam == null || targetTeam.teamID == 0) {
-            sender.sendMessage("§cIs not in a team!")
-            return
+        Database.getTeamData(target.uniqueId).whenComplete { targetTeam, error ->
+            if (error != null) {
+                error.printStackTrace()
+                return@whenComplete
+            }
+
+            if (targetTeam == null || targetTeam.teamID == 0) {
+                sender.sendMessage("§cIs not in a team!")
+                return@whenComplete
+            }
+
+            val silent =
+                args.joinToString(" ").contains("-s")
+
+            for (targetTeamMemberUUIDs in targetTeam.members!!) {
+                if (Bukkit.getPlayer(targetTeamMemberUUIDs) == null)
+                    continue
+
+                val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
+                Database.getTeamData(targetTeamMemberUUIDs).whenComplete { targetTeamMemberTeamData, error1 ->
+                    if (error1 != null) {
+                        error1.printStackTrace()
+                        return@whenComplete
+                    }
+
+                    if (targetTeamMemberTeamData != null)
+                        targetTeamMemberTeamData.members!!.add(sender.uniqueId)
+                }
+                if (!silent)
+                    targetTeamMembers.sendMessage("§e${sender.name} §6joined the team!")
+            }
+
+            targetTeam.members!!.add(sender.uniqueId)
+
+            team.teamID = targetTeam.teamID
+            team.members = targetTeam.members
+            team.leader = targetTeam.leader
+            team.friendlyFire = targetTeam.friendlyFire
+
+            Database.saveTeamData(team)
+            sender.sendMessage("§6You joined §e${Bukkit.getOfflinePlayer(team.leader).name}'s §6team!")
         }
-
-        val silent =
-            args.joinToString(" ").contains("-s")
-
-        for (targetTeamMemberUUIDs in targetTeam.members!!) {
-            if (Bukkit.getPlayer(targetTeamMemberUUIDs) == null)
-                continue
-
-            val targetTeamMembers = Bukkit.getPlayer(targetTeamMemberUUIDs)
-            val targetTeamMemberTeamData = Database.getTeamData(targetTeamMemberUUIDs) ?: return
-
-            targetTeamMemberTeamData.members!!.add(sender.uniqueId)
-            if (!silent)
-                targetTeamMembers.sendMessage("§e${sender.name} §6joined the team!")
-        }
-
-        targetTeam.members!!.add(sender.uniqueId)
-
-        team.teamID = targetTeam.teamID
-        team.members = targetTeam.members
-        team.leader = targetTeam.leader
-        team.friendlyFire = targetTeam.friendlyFire
-
-        Database.saveTeamData(team)
-
-        sender.sendMessage("§6You joined §e${Bukkit.getOfflinePlayer(team.leader).name}'s §6team!")
 
     }
 
