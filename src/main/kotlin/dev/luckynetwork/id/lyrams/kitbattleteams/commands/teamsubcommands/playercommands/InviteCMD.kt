@@ -20,7 +20,6 @@ class InviteCMD(name: String, vararg aliases: String) : SubCommand(name, *aliase
         }
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return
@@ -47,7 +46,6 @@ class InviteCMD(name: String, vararg aliases: String) : SubCommand(name, *aliase
         }
 
         val inviteManager = InviteManager.INVITE_MAP
-
         if (!inviteManager.containsKey(sender))
             inviteManager[sender] = ArrayList()
 
@@ -67,7 +65,6 @@ class InviteCMD(name: String, vararg aliases: String) : SubCommand(name, *aliase
         )
 
         Bukkit.getScheduler().runTaskLater(KitBattleTeams.instance, {
-
             if (inviteManager[sender] == null)
                 return@runTaskLater
 
@@ -76,23 +73,19 @@ class InviteCMD(name: String, vararg aliases: String) : SubCommand(name, *aliase
 
             if (Bukkit.getPlayer(target.name) != null)
                 target.sendMessage("§7Team invitation from §l${sender.name} §7has expired.")
-
         }, 6000L)
 
     }
 
     private fun notifyInvitationToTeam(player: Player, invited: Player) {
         val teamData = Database.getTeamData(player)
-
         for (teamMembers in teamData.members!!) {
             if (Bukkit.getPlayer(teamMembers) == null || player == invited)
                 continue
 
             val targetTeamMembers = Bukkit.getPlayer(teamMembers)
-
             targetTeamMembers.sendMessage("§e§l${player.name} §6invited §e${invited.name} §6to your team!")
         }
-
     }
 
 }

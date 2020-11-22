@@ -15,7 +15,6 @@ class ForceDisbandCMD(name: String, vararg aliases: String) : SubCommand(name, *
             return
         }
 
-        // casts target
         val target =
             when {
                 args.isEmpty() -> {
@@ -68,31 +67,23 @@ class ForceDisbandCMD(name: String, vararg aliases: String) : SubCommand(name, *
 
 
     private fun removeTeamFromDB(teamID: Int): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
             try {
-                Database.helper.query("DELETE FROM teamdata WHERE team_id = ?;")
-                    .execute(teamID)
-
+                Database.helper.query("DELETE FROM teamdata WHERE team_id = ?;").execute(teamID)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }, Database.threadPool)
-
     }
 
     private fun removePlayerFromTeam(uuid: UUID): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
             try {
-                Database.helper.query("UPDATE playerdata SET team_id = ? WHERE uuid = ?")
-                    .execute("0", uuid)
-
+                Database.helper.query("UPDATE playerdata SET team_id = ? WHERE uuid = ?").execute("0", uuid)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }, Database.threadPool)
-
     }
 
 }

@@ -50,11 +50,8 @@ class TeamCMD : CommandExecutor {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }
-
         return false
-        
     }
 
 }

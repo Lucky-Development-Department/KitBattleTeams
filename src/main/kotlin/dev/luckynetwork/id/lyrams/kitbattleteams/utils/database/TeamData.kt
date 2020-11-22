@@ -1,7 +1,7 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.utils.database
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.KitBattleTeams
-import dev.luckynetwork.id.lyrams.kitbattleteams.managers.TeamPrivacy
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.TeamPrivacy
 import org.bukkit.entity.Player
 import org.bukkit.metadata.FixedMetadataValue
 import java.util.*

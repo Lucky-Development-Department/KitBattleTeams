@@ -19,7 +19,6 @@ class ForceJoinCMD(name: String, vararg aliases: String) : SubCommand(name, *ali
         }
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID != 0) {
             sender.sendMessage("§cYou are already in a team!")
             return
@@ -78,7 +77,6 @@ class ForceJoinCMD(name: String, vararg aliases: String) : SubCommand(name, *ali
             Database.saveTeamData(team)
             sender.sendMessage("§6You joined §e${Bukkit.getOfflinePlayer(team.leader).name}'s §6team!")
         }
-
     }
 
 }

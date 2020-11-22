@@ -2,7 +2,8 @@ package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playe
 
 import com.github.alviannn.sqlhelper.utils.Closer
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
-import dev.luckynetwork.id.lyrams.kitbattleteams.managers.TeamPrivacy
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.TeamPrivacy
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.TeamData
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class CreateCMD(name: String) : SubCommand(name) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["CREATECMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.CREATE]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -26,14 +27,12 @@ class CreateCMD(name: String) : SubCommand(name) {
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID != 0) {
             sender.sendMessage("§cYou are already in a team!")
             return
         }
 
         val currentTime = System.currentTimeMillis()
-
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
                 if (currentTime - antiSpamMap!![sender]!! < 60000) {
@@ -59,13 +58,11 @@ class CreateCMD(name: String) : SubCommand(name) {
         team.privacy = TeamPrivacy.PRIVATE
 
         createTeam(team)
-
         sender.sendMessage("§aTeam created!")
-
     }
 
     private fun createTeam(teamData: TeamData): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
 
             try {
                 Closer().use { closer ->
@@ -82,8 +79,8 @@ class CreateCMD(name: String) : SubCommand(name) {
                         Database.helper.query("SELECT * FROM teamdata WHERE leader = ?;")
                             .getResults(teamData.leader)
                     )
-                    val set = results.resultSet
 
+                    val set = results.resultSet
                     if (set.next()) {
                         teamData.teamID = set.getInt("team_id")
 

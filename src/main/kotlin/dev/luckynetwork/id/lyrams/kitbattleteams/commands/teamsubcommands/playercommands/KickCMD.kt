@@ -19,7 +19,6 @@ class KickCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
         }
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return

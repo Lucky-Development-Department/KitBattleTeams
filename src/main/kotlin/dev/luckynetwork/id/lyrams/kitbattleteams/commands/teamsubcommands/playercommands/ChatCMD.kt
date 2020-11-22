@@ -24,17 +24,13 @@ class ChatCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
         if (args.isNotEmpty())
             sendTeamMessage(sender, args.joinToString(" "))
         else {
-
             val state = team.toggleTeamChatting()
             sender.sendMessage("§aTeam chat: ${state}!")
-
         }
-
     }
 
 
     companion object {
-
         fun sendTeamMessage(player: Player, message: String) {
             val teamData = Database.getTeamData(player)
             val teamMembers = teamData.members ?: return
@@ -50,22 +46,16 @@ class ChatCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
                     teamMember.sendMessage("§6§l${player.name}§e: $message")
                 else
                     teamMember.sendMessage("§6${player.name}§e: $message")
-
             }
-
             sendSpyChatMessage(player, message)
-
         }
 
         private fun sendSpyChatMessage(sender: Player, message: String) {
-
             Bukkit.getOnlinePlayers().forEach {
                 if (it.isSpyChat())
                     it.sendMessage("§7§l[SPY] §7${sender.name}: $message")
             }
-
         }
-
     }
 
 }

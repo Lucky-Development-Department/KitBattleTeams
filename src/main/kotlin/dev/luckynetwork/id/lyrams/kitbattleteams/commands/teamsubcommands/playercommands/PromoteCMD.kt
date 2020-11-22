@@ -1,6 +1,7 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playercommands
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -11,7 +12,7 @@ import java.util.*
 @Suppress("DEPRECATION")
 class PromoteCMD(name: String) : SubCommand(name) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["TRASNFERCMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.TRANSFER]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -23,7 +24,6 @@ class PromoteCMD(name: String) : SubCommand(name) {
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return
@@ -35,7 +35,6 @@ class PromoteCMD(name: String) : SubCommand(name) {
         }
 
         val currentTime = System.currentTimeMillis()
-
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
                 if (currentTime - antiSpamMap!![sender]!! < 60000) {

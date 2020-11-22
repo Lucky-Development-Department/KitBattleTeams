@@ -8,13 +8,10 @@ import org.bukkit.entity.Player
 class HelpCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
     override fun execute(sender: CommandSender, args: Array<out String>) {
-        sendHelpMessage(
-            sender
-        )
+        sendHelpMessage(sender)
     }
 
     companion object {
-
         fun sendHelpMessage(sender: CommandSender) {
             sender.sendMessage("§6Team Commands:")
             sender.sendMessage(" ")
@@ -27,17 +24,12 @@ class HelpCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
             sender.sendMessage("§6* §e/team chat [message] §7- Send only teammates a message.")
 
             if (sender !is Player) {
-
                 sendHelpMessage(sender)
-
             } else {
-
                 val teamData = Database.getTeamData(sender)
                 if (teamData.teamID != 0 && teamData.leader == sender.uniqueId)
                     sendLeaderHelpMessage(sender)
-
             }
-
         }
 
         private fun sendLeaderHelpMessage(sender: CommandSender) {
@@ -52,7 +44,6 @@ class HelpCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
             sender.sendMessage("§6* §e/team disband §7- Disband the team.")
             sender.sendMessage("§6* §e/team ff §7- Toggles friendly fire.")
         }
-
     }
 
 }

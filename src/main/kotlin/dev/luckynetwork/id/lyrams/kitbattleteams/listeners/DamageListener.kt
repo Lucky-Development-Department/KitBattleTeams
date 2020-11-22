@@ -28,9 +28,7 @@ class DamageListener : Listener {
             val shooter = damager.shooter
             if (shooter is Player && teamData.members!!.contains(shooter.uniqueId))
                 event.isCancelled = true
-
         }
-
     }
 
 }

@@ -1,6 +1,7 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playercommands
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -10,7 +11,7 @@ import java.util.*
 
 class LeaveCMD(name: String) : SubCommand(name) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["LEAVECMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.LEAVE]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -37,7 +38,6 @@ class LeaveCMD(name: String) : SubCommand(name) {
         }
 
         val currentTime = System.currentTimeMillis()
-
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
                 if (currentTime - antiSpamMap!![sender]!! < 10000) {

@@ -3,7 +3,8 @@ package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playe
 import dev.luckynetwork.id.lyrams.kitbattleteams.KitBattleTeams
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.InviteManager
-import dev.luckynetwork.id.lyrams.kitbattleteams.managers.TeamPrivacy
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.TeamPrivacy
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -13,7 +14,7 @@ import java.util.*
 
 class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["JOINCMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.JOIN]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -25,7 +26,6 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID != 0) {
             sender.sendMessage("§cYou are already in a team!")
             return
@@ -50,7 +50,6 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
                 }
 
                 val inviteManager = InviteManager.INVITE_MAP
-
                 if (targetTeam.privacy == TeamPrivacy.PRIVATE &&
                     (inviteManager[target] == null || !inviteManager[target]!!.contains(sender))
                 ) {
@@ -64,7 +63,6 @@ class JoinCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
                 }
 
                 val currentTime = System.currentTimeMillis()
-
                 if (!sender.hasPermission("kbteams.bypassantispam"))
                     if (antiSpamMap!!.containsKey(sender)) {
                         if (currentTime - antiSpamMap!![sender]!! < 10000) {

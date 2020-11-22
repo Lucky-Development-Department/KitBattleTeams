@@ -3,7 +3,7 @@ package dev.luckynetwork.id.lyrams.kitbattleteams.utils.database
 import com.github.alviannn.sqlhelper.SQLHelper
 import com.github.alviannn.sqlhelper.utils.Closer
 import dev.luckynetwork.id.lyrams.kitbattleteams.KitBattleTeams
-import dev.luckynetwork.id.lyrams.kitbattleteams.managers.TeamPrivacy
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.TeamPrivacy
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.cache2k.Cache
@@ -15,7 +15,6 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.function.Supplier
 
 object Database {
 
@@ -32,11 +31,11 @@ object Database {
             .entryCapacity(Long.MAX_VALUE)
             .permitNullValues(false)
             .eternal(true)
-            .addListener(CacheEntryExpiredListener<UUID, TeamData> { _, entry ->
+            .addListener(CacheEntryExpiredListener { _, entry ->
                 val teamData: TeamData = entry.value
                 saveTeamData(teamData)
             })
-            .addListener(CacheEntryExpiredListener<UUID, TeamData> { _, _ ->
+            .addListener(CacheEntryExpiredListener { _, _ ->
                 Bukkit.getOnlinePlayers().forEach { savePlayerData(it) }
             })
             .build()
@@ -67,8 +66,7 @@ object Database {
     }
 
     private fun loadTeamData(player: Player): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
-
+        return CompletableFuture.runAsync({
             try {
                 Closer().use { closer ->
                     val results =
@@ -78,16 +76,13 @@ object Database {
                         )
 
                     val set = results.resultSet
-
                     if (set.next()) {
-
                         val members = set.getString("members")
                             .replace("[", "")
                             .replace("]", "")
                             .split(", ")
 
                         val membersArray = ConcurrentHashMap.newKeySet<UUID>()
-
                         for (member in members)
                             membersArray.add(UUID.fromString(member))
 
@@ -103,25 +98,19 @@ object Database {
                                 TeamPrivacy.valueOf(set.getString("privacy"))
                             )
                         )
-
                     }
-
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }, threadPool)
-
     }
 
     private fun loadTeamData(uuid: UUID): CompletableFuture<TeamData?> {
-        return CompletableFuture.supplyAsync(Supplier {
+        return CompletableFuture.supplyAsync({
             var teamData: TeamData? = null
-
             try {
                 Closer().use { closer ->
-
                     val results2 =
                         closer.add(helper.query("SELECT * FROM playerdata WHERE uuid = ?;").getResults(uuid))
                     val set2 = results2.resultSet
@@ -131,7 +120,6 @@ object Database {
                             set2.getInt("team_id")
                         else
                             0
-
                     val results =
                         closer.add(
                             helper.query("SELECT * FROM teamdata WHERE team_id = ?;")
@@ -139,7 +127,6 @@ object Database {
                         )
 
                     val set = results.resultSet
-
                     if (set.next()) {
                         val members = set.getString("members")
                             .replace("[", "")
@@ -147,7 +134,6 @@ object Database {
                             .split(", ")
 
                         val membersArray = ConcurrentHashMap.newKeySet<UUID>()
-
                         for (member in members)
                             membersArray.add(UUID.fromString(member))
 
@@ -169,13 +155,11 @@ object Database {
             }
 
             teamData
-
         }, threadPool)
-
     }
 
     fun loadPlayerData(player: Player): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
             var exists = false
 
             try {
@@ -209,7 +193,7 @@ object Database {
     }
 
     fun savePlayerData(player: Player): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
             try {
                 val teamData = getTeamData(player)
 
@@ -248,7 +232,7 @@ object Database {
     }
 
     private fun createEmptyPlayerData(player: Player): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
+        return CompletableFuture.runAsync({
             try {
                 Closer().use {
                     helper.query("INSERT INTO playerdata (uuid, team_id) VALUES (?, ?);")

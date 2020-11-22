@@ -6,7 +6,7 @@ plugins {
 
 def pluginName = 'KitBattleTeams'
 group 'dev.luckynetwork.id.lyrams.kitbattleteams'
-version '1.2'
+version '1.3'
 
 repositories {
     mavenCentral()

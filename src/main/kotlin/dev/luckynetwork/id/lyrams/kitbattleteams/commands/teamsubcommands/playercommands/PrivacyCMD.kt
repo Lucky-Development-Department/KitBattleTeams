@@ -1,7 +1,8 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playercommands
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
-import dev.luckynetwork.id.lyrams.kitbattleteams.managers.TeamPrivacy
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.TeamPrivacy
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -11,7 +12,7 @@ import java.util.*
 
 class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["PRIVACYCMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.PRIVACY]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -23,7 +24,6 @@ class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return
@@ -35,7 +35,6 @@ class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
         }
 
         val currentTime = System.currentTimeMillis()
-
         if (!sender.hasPermission("kbteams.bypassantispam"))
             if (antiSpamMap!!.containsKey(sender)) {
                 if (currentTime - antiSpamMap!![sender]!! < 2000) {
@@ -96,7 +95,6 @@ class PrivacyCMD(name: String, vararg aliases: String) : SubCommand(name, *alias
             Database.saveTeamData(team)
 
         sender.sendMessage("§aPrivacy: ${team.privacy}")
-
     }
 
 }

@@ -38,10 +38,7 @@ class ConnectionListener(private val plugin: KitBattleTeams) : Listener {
                 if (it.containsKey(player))
                     it.remove(player)
             }
-
         }, 60L * 20L)
-
     }
-
 
 }

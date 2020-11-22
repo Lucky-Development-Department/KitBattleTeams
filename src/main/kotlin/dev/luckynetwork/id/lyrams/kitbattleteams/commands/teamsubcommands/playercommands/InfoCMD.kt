@@ -11,7 +11,6 @@ import org.bukkit.entity.Player
 class InfoCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
     override fun execute(sender: CommandSender, args: Array<out String>) {
-
         val target =
             when {
                 sender !is Player -> {
@@ -23,11 +22,12 @@ class InfoCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases)
                         else -> Bukkit.getOfflinePlayer(args[0])
                     }
                 }
-                args.isNotEmpty() ->
+                args.isNotEmpty() -> {
                     Bukkit.getOfflinePlayer(args[0])
-
-                else -> sender
-
+                }
+                else -> {
+                    sender
+                }
             }
 
         Database.getTeamData(target.uniqueId).whenComplete { team, error ->

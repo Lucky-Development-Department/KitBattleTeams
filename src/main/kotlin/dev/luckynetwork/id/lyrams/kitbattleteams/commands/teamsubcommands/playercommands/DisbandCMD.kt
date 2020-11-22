@@ -1,6 +1,7 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playercommands
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -11,7 +12,7 @@ import java.util.concurrent.CompletableFuture
 
 class DisbandCMD(name: String) : SubCommand(name) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["DISBANDCMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.DISBAND]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -23,7 +24,6 @@ class DisbandCMD(name: String) : SubCommand(name) {
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return
@@ -76,35 +76,23 @@ class DisbandCMD(name: String) : SubCommand(name) {
     }
 
     private fun removeTeamFromDB(teamID: Int): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
-
+        return CompletableFuture.runAsync({
             try {
-
-                Database.helper.query("DELETE FROM teamdata WHERE team_id = ?;")
-                    .execute(teamID)
-
+                Database.helper.query("DELETE FROM teamdata WHERE team_id = ?;").execute(teamID)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }, Database.threadPool)
-
     }
 
     private fun removePlayerFromTeam(uuid: UUID): CompletableFuture<Void> {
-        return CompletableFuture.runAsync(Runnable {
-
+        return CompletableFuture.runAsync({
             try {
-
-                Database.helper.query("UPDATE playerdata SET team_id = ? WHERE uuid = ?")
-                    .execute("0", uuid)
-
+                Database.helper.query("UPDATE playerdata SET team_id = ? WHERE uuid = ?").execute("0", uuid)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-
         }, Database.threadPool)
-
     }
 
 }

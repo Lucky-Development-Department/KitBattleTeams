@@ -1,6 +1,7 @@
 package dev.luckynetwork.id.lyrams.kitbattleteams.commands.teamsubcommands.playercommands
 
 import dev.luckynetwork.id.lyrams.kitbattleteams.managers.AntiSpamManager
+import dev.luckynetwork.id.lyrams.kitbattleteams.managers.enums.AntiSpamType
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.SubCommand
 import dev.luckynetwork.id.lyrams.kitbattleteams.utils.database.Database
 import org.bukkit.Bukkit
@@ -10,7 +11,7 @@ import java.util.*
 
 class FriendlyFireCMD(name: String, vararg aliases: String) : SubCommand(name, *aliases) {
 
-    private var antiSpamMap = AntiSpamManager.antiSpamMap["FFCMD"]
+    private var antiSpamMap = AntiSpamManager.antiSpamMap[AntiSpamType.FRIENDLY_FIRE]
 
     init {
         val emptyMap = HashMap<Player, Long>()
@@ -22,7 +23,6 @@ class FriendlyFireCMD(name: String, vararg aliases: String) : SubCommand(name, *
             return
 
         val team = Database.getTeamData(sender)
-
         if (team.teamID == 0) {
             sender.sendMessage("§cYou are not in a team!")
             return

@@ -19,7 +19,6 @@ class ChatListener : Listener {
 
         event.isCancelled = true
         ChatCMD.sendTeamMessage(player, event.message)
-
     }
 
 }
